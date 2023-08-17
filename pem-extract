@@ -1,0 +1,12 @@
+#!/bin/bash
+. ./cert-utils.sh
+file=$1
+
+check_openssl
+
+if __file_exist "$file" ; then
+   result=$( _pem_extract "$file")
+   __msg_info "extracted to $result "
+else
+    __msg_error " $file not found"
+fi

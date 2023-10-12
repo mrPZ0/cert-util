@@ -1,21 +1,25 @@
 #!/bin/bash
 
-. base-functions.sh
+PACKAGE_NAME="cert-util"
+#. base-functions.sh
+#source "$SCRIPT_HOME/bin/base-functions.sh"
+dn=$(dirname $0)
+source $dn/base-functions.sh
 default_pass=123456
 
 function check_openssl() {
     if ! __cmd_exists "openssl"; then
-        __msg_error " install openssl and run again"
+        _msg_error " install openssl and run again"
     else
-        __msg_info "check openssl version"
+        _msg_info "check openssl version"
     fi
 }
 
 function check_keytool() {
     if ! __cmd_exists "keytool"; then
-        __msg_error " install keytool and run again"
+        _msg_error " install keytool and run again"
     else
-        __msg_info "check keytool version"
+        _msg_info "check keytool version"
     fi
 }
 
@@ -42,16 +46,19 @@ function _pem_ls() {
         local tmp_dir="$file"_tmp
         mkdir $tmp_dir
         gawk -v tmp_dir=$tmp_dir 'BEGIN {c=0;} /BEGIN CER/ {c++} {print > "./" tmp_dir "/cert." c ".pem"}' < $file
+         if __file_exist "$tmp_dir/cert.0.pem" ; then
+            rm -f "$tmp_dir/cert.0.pem"
+        fi
         
         for cert in $(ls $tmp_dir);
         do
-            __msg_delimiter
+            _msg_delimiter
             local IFS=$'\n'
             for data1 in $(openssl x509 -in "./$tmp_dir/$cert" -inform PEM -noout -issuer -subject -dates -ext keyUsage.extendedKeyUsage );
             do
                 echo $data1
             done
-            __msg_delimiter
+            _msg_delimiter
         done
         rm -rf $tmp_dir
     fi
